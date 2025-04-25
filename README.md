@@ -11,7 +11,7 @@ Elle prend en charge la lecture/écriture des PDOs, la gestion de la mémoire NV
 - Modification et persistance de la configuration dans la mémoire NVM
 - Lecture automatique des données lors du démarrage
 - Mise à jour automatique via la broche `ALERT` ou périodique
-- Intégration propre avec la classe `I2CDevice`
+- Intégration propre avec la classe `I2CDevices`
 
 ---
 
@@ -39,7 +39,7 @@ idf_component_register(
 #include "stusb4500.hpp"
 using namespace stusb4500;
 
-auto i2c = std::make_shared<I2CDevice>(
+auto i2c = std::make_shared<I2CDevices>(
     I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, 0x28, 400000
 );
 
