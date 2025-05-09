@@ -3,7 +3,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-RXDATAS";
+    static const char *TAG = "STUSB4500-RXDATAS";
 
     esp_err_t RXDatas::read()
     {

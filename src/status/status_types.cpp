@@ -4,7 +4,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-STATUS";
+    static const char *TAG = "STUSB4500-STATUS";
     inline std::string json_bool(const char *key, bool value)
     {
         return "\"" + std::string(key) + "\": " + (value ? "true" : "false");

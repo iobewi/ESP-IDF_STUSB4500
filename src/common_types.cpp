@@ -5,7 +5,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-PDO";
+    static const char *TAG = "STUSB4500-PDO";
         void PowerProfile::decode(uint32_t raw, size_t index)
     {
 

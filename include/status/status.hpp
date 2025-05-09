@@ -93,7 +93,7 @@ namespace stusb4500
         std::string to_json() const;
 
     private:
-        inline static const char *TAG = "STUSB450-STATUS";
+        inline static const char *TAG = "STUSB4500-STATUS";
     };
 
 } // namespace stusb4500

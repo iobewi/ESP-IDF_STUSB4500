@@ -4,7 +4,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-CONFIG";
+    static const char *TAG = "STUSB4500-CONFIG";
     
     Config::Config(const PDObjectProfile &p1,
                    const PDObjectProfile &p2,

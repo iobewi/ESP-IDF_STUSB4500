@@ -4,7 +4,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-RDO";
+    static const char *TAG = "STUSB4500-RDO";
 
     esp_err_t RDO::read()
     {

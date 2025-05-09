@@ -10,7 +10,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-NVM";
+    static const char *TAG = "STUSB4500-NVM";
 
 
     esp_err_t NVM::write_ctrl0(uint8_t flags)

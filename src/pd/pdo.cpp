@@ -4,7 +4,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-PDO";
+    static const char *TAG = "STUSB4500-PDO";
 
     PDO::PDO(I2CDevices &dev,
             const size_t index,

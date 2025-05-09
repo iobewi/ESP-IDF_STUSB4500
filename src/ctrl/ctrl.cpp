@@ -3,7 +3,7 @@
 
 namespace stusb4500
 {
-    static const char *TAG = "STUSB450-CTRL";
+    static const char *TAG = "STUSB4500-CTRL";
 
     esp_err_t CTRL::send_soft_reset()
     {
