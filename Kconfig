@@ -1,49 +1,309 @@
 menu "STUSB4500"
+    orsource "$IDF_PATH/examples/common_components/env_caps/$IDF_TARGET/Kconfig.env_caps"
+    menu "STUSB4500 Configuration (NVM Defaults)"
 
-    menu "I2C Master"
+        menu "Discharge Settings"
+            config STUSB4500_DISCHARGE_DISABLE
+                bool "Disable discharge"
+                default n
 
-        orsource "$IDF_PATH/examples/common_components/env_caps/$IDF_TARGET/Kconfig.env_caps"
+            config STUSB4500_DISCHARGE_TO_0V
+                int "Discharge time to 0V"
+                range 0 15
+                default 9
+            
+            config STUSB4500_DISCHARGE_TO_PDO
+                int "Discharge time to PDO"
+                range 0 15
+                default 12
+        endmenu
+
+        config STUSB4500_USB_COMM_CAPABLE
+            bool "USB Communication Capable"
+            default n
         
-        config I2C_MASTER_SDA
-            int "SDA GPIO Num"
-            range ENV_GPIO_RANGE_MIN ENV_GPIO_OUT_RANGE_MAX
-            default 1 if  IDF_TARGET_ESP32S3 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32H2
-            default 21 if IDF_TARGET_ESP32
-            default 5
-            help
-                GPIO number for I2C Master data line.
+        config STUSB4500_DUAL_ROLE_POWER
+            bool "Dual Role Power"
+            default n
+        
+        config STUSB4500_HIGHER_CAPABILITY
+            bool "Higher Capability"
+            default n
+        
+        config STUSB4500_UNCONSTRAINED_POWER
+            bool "Unconstrained Power"
+            default n
+        
+        config STUSB4500_POWER_ONLY_5V
+            bool "Restrict negotiation to 5V only"
+            default n
+        
+        config STUSB4500_REQ_SRC_CURRENT
+            bool "Request Source Current"
+            default n
 
-        config I2C_MASTER_SCL
-            int "SCL GPIO Num"
-            range ENV_GPIO_RANGE_MIN ENV_GPIO_OUT_RANGE_MAX
-            default 2 if  IDF_TARGET_ESP32S3 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32H2
-            default 22 if IDF_TARGET_ESP32
-            default 6
-            help
-                GPIO number for I2C Master clock line.
+        config STUSB4500_ALERT_MASK
+            hex "Alert Mask"
+            default 0xFB
+            
+        choice STUSB4500_FAST_ROLE_SWAP
+            prompt "Fast Role Swap"
+            default STUSB4500_FRS_NOT_SUPPORTED
+    
+        config STUSB4500_FRS_NOT_SUPPORTED
+            bool "Not supported"
+    
+        config STUSB4500_FRS_DEFAULT_USB
+            bool "Default USB"
+    
+        config STUSB4500_FRS_1A5
+            bool "1.5A"
+    
+        config STUSB4500_FRS_3A0
+            bool "3.0A"
+    
+        endchoice
 
-        config I2C_MASTER_PORT_NUM
-            int "Port Number"
-            default 1 if SOC_I2C_NUM > 1
-            default 0
-            help
-                Port number for I2C Master device.
+        choice STUSB4500_GPIO_FUNCTION
+            prompt "GPIO Function"
+            default STUSB4500_GPIO_FUNC_ERROR_RECOVERY
+    
+        config STUSB4500_GPIO_FUNC_SWCTRL
+            bool "SWCtrl"
+    
+        config STUSB4500_GPIO_FUNC_ERROR_RECOVERY
+            bool "ErrorRecovery"
+    
+        config STUSB4500_GPIO_FUNC_DEBUG
+            bool "Debug"
+    
+        config STUSB4500_GPIO_FUNC_SINK_POWER
+            bool "SinkPower"
+    
+        endchoice
+        
+        choice STUSB4500_POWER_OK_CONFIG
+            prompt "Power OK Configuration"
+            default STUSB4500_POWER_OK_CFG_2
+    
+        config STUSB4500_POWER_OK_CFG_1
+            bool "CONFIG_1"
+    
+        config STUSB4500_POWER_OK_CFG_NOT_APPLICABLE
+            bool "Not Applicable"
+    
+        config STUSB4500_POWER_OK_CFG_2
+            bool "CONFIG_2"
+    
+        config STUSB4500_POWER_OK_CFG_3
+            bool "CONFIG_3"
+    
+        endchoice
+        menu "PDOs Configuration"
+            config STUSB4500_FLEX_CURRENT
+                int "Target Flex Current (mA)"
+                range 0 5000
+                default 2000   
+            config STUSB4500_PDO2_ENABLE
+                bool "Enable PDO 2"
+                default y
+            
+            config STUSB4500_PDO3_ENABLE
+                bool "Enable PDO 3"
+                default y
+        
+            menu "PDO 1"
+                choice STUSB4500_PDO1_CURRENT
+                    prompt "PDO1 Current (mA)"
+                    default STUSB4500_PDO1_CURRENT_1500
+                
+                config STUSB4500_PDO1_CURRENT_500
+                    bool "500 mA"
+                config STUSB4500_PDO1_CURRENT_750
+                    bool "750 mA"
+                config STUSB4500_PDO1_CURRENT_1000
+                    bool "1000 mA"
+                config STUSB4500_PDO1_CURRENT_1250
+                    bool "1250 mA"
+                config STUSB4500_PDO1_CURRENT_1500
+                    bool "1500 mA"
+                config STUSB4500_PDO1_CURRENT_1750
+                    bool "1750 mA"
+                config STUSB4500_PDO1_CURRENT_2000
+                    bool "2000 mA"
+                config STUSB4500_PDO1_CURRENT_2250
+                    bool "2250 mA"
+                config STUSB4500_PDO1_CURRENT_2500
+                    bool "2500 mA"
+                config STUSB4500_PDO1_CURRENT_2750
+                    bool "2750 mA"
+                config STUSB4500_PDO1_CURRENT_3000
+                    bool "3000 mA"
+                config STUSB4500_PDO1_CURRENT_3500
+                    bool "3500 mA"
+                config STUSB4500_PDO1_CURRENT_4000
+                    bool "4000 mA"
+                config STUSB4500_PDO1_CURRENT_4500
+                    bool "4500 mA"
+                config STUSB4500_PDO1_CURRENT_5000
+                    bool "5000 mA"
+                config STUSB4500_PDO1_CURRENT_FLEX
+                    bool "Flexible current"
+                endchoice
 
-        config I2C_MASTER_FREQUENCY
-            int "Master Frequency"
-            default 100000
-            help
-                I2C Speed of Master device.
+                config STUSB4500_PDO1_VBUS_LOW
+                    int "VBUS Low Threshold (%)"
+                    range 0 15
+                    default 15
+        
+                config STUSB4500_PDO1_VBUS_HIGH
+                    int "VBUS High Threshold (%)"
+                    range 0 15
+                    default 10
+            endmenu
+        
+            menu "PDO 2"
+      
+                config STUSB4500_PDO2_VOLTAGE
+                    int "Voltage (mV)"
+                    range 5000 20000
+                    default 15000
+            
+                choice STUSB4500_PDO2_CURRENT
+                    prompt "PDO2 Current (mA)"
+                    default STUSB4500_PDO2_CURRENT_1500
+            
+                    config STUSB4500_PDO2_CURRENT_500
+                        bool "500 mA"
+                    config STUSB4500_PDO2_CURRENT_750
+                        bool "750 mA"
+                    config STUSB4500_PDO2_CURRENT_1000
+                        bool "1000 mA"
+                    config STUSB4500_PDO2_CURRENT_1250
+                        bool "1250 mA"
+                    config STUSB4500_PDO2_CURRENT_1500
+                        bool "1500 mA"
+                    config STUSB4500_PDO2_CURRENT_1750
+                        bool "1750 mA"
+                    config STUSB4500_PDO2_CURRENT_2000
+                        bool "2000 mA"
+                    config STUSB4500_PDO2_CURRENT_2250
+                        bool "2250 mA"
+                    config STUSB4500_PDO2_CURRENT_2500
+                        bool "2500 mA"
+                    config STUSB4500_PDO2_CURRENT_2750
+                        bool "2750 mA"
+                    config STUSB4500_PDO2_CURRENT_3000
+                        bool "3000 mA"
+                    config STUSB4500_PDO2_CURRENT_3500
+                        bool "3500 mA"
+                    config STUSB4500_PDO2_CURRENT_4000
+                        bool "4000 mA"
+                    config STUSB4500_PDO2_CURRENT_4500
+                        bool "4500 mA"
+                    config STUSB4500_PDO2_CURRENT_5000
+                        bool "5000 mA"
+                    config STUSB4500_PDO2_CURRENT_FLEX
+                        bool "Flexible current"
+                endchoice
+            
+                config STUSB4500_PDO2_VBUS_LOW
+                    int "VBUS Low Threshold (%)"
+                    range 0 15
+                    default 15
+            
+                config STUSB4500_PDO2_VBUS_HIGH
+                    int "VBUS High Threshold (%)"
+                    range 0 15
+                    default 5
+            endmenu
+        
+            menu "PDO 3"
+            
+                config STUSB4500_PDO3_VOLTAGE
+                    int "Voltage (mV)"
+                    range 5000 20000
+                    default 20000
+            
+                choice STUSB4500_PDO3_CURRENT
+                    prompt "PDO3 Current (mA)"
+                    default STUSB4500_PDO3_CURRENT_1000
+            
+                    config STUSB4500_PDO3_CURRENT_500
+                        bool "500 mA"
+                    config STUSB4500_PDO3_CURRENT_750
+                        bool "750 mA"
+                    config STUSB4500_PDO3_CURRENT_1000
+                        bool "1000 mA"
+                    config STUSB4500_PDO3_CURRENT_1250
+                        bool "1250 mA"
+                    config STUSB4500_PDO3_CURRENT_1500
+                        bool "1500 mA"
+                    config STUSB4500_PDO3_CURRENT_1750
+                        bool "1750 mA"
+                    config STUSB4500_PDO3_CURRENT_2000
+                        bool "2000 mA"
+                    config STUSB4500_PDO3_CURRENT_2250
+                        bool "2250 mA"
+                    config STUSB4500_PDO3_CURRENT_2500
+                        bool "2500 mA"
+                    config STUSB4500_PDO3_CURRENT_2750
+                        bool "2750 mA"
+                    config STUSB4500_PDO3_CURRENT_3000
+                        bool "3000 mA"
+                    config STUSB4500_PDO3_CURRENT_3500
+                        bool "3500 mA"
+                    config STUSB4500_PDO3_CURRENT_4000
+                        bool "4000 mA"
+                    config STUSB4500_PDO3_CURRENT_4500
+                        bool "4500 mA"
+                    config STUSB4500_PDO3_CURRENT_5000
+                        bool "5000 mA"
+                    config STUSB4500_PDO3_CURRENT_FLEX
+                        bool "Flexible current"
+                endchoice
+            
+                config STUSB4500_PDO3_VBUS_LOW
+                    int "VBUS Low Threshold (%)"
+                    range 0 15
+                    default 15
+            
+                config STUSB4500_PDO3_VBUS_HIGH
+                    int "VBUS High Threshold (%)"
+                    range 0 15
+                    default 5
+            endmenu       
+        endmenu      
 
     endmenu
 
     menu "STUSB4500 Standalone USB PD controller"
 
         config STUSB4500_I2C_ADDRESS
-            hex
-            default 0x40
+            hex "I2C hardware address"
+            default 0x28
             help
-                Hardware address of STUSB4500
+                STUSB4500 I2C hardware address
+
+        config STUSB4500_I2C_MASTER_PORT_NUM
+            int "I2C Port Number"
+            default 0
+            help
+                I2C port index used by the Master
+
+        config STUSB4500_I2C_MASTER_FREQUENCY
+            int "I2C Clock Frequency (Hz)"
+            default 100000
+            help
+                Frequency for I2C Master operations
+        
+        config STUSB4500_INT_ALERT
+            int "INT GPIO Number"
+            range ENV_GPIO_RANGE_MIN ENV_GPIO_OUT_RANGE_MAX
+            default 9
+            help
+                GPIO used for STUSB4500 ALERT interrupt
+
     endmenu
 
 endmenu

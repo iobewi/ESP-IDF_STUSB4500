@@ -1,116 +1,157 @@
-# STUSB4500 – Driver C++ moderne pour ESP-IDF
+# STUSB4500Manager – Pilote C++ Moderne pour ESP-IDF
 
-`STUSB4500` est une bibliothèque C++ moderne permettant de configurer et piloter simplement le circuit STUSB4500 via I2C avec ESP-IDF.  
-Elle prend en charge la lecture/écriture des PDOs, la gestion de la mémoire NVM, et propose un mécanisme de synchronisation automatique basé sur la broche `ALERT`.
-
----
-
-## 📦 Fonctions principales
-
-- Abstraction haut niveau pour la lecture/écriture des PDOs
-- Modification et persistance de la configuration dans la mémoire NVM
-- Lecture automatique des données lors du démarrage
-- Mise à jour automatique via la broche `ALERT` ou périodique
-- Intégration propre avec la classe `I2CDevices`
+> Gestion complète du contrôleur USB-PD **STUSB4500** avec support I2C, NVM, ALERT et configuration automatique.
 
 ---
 
-## 🔧 Installation
+## 🧭 Table des matières
 
-Placer les fichiers de la bibliothèque dans un dossier `components/stusb4500/` de votre projet ESP-IDF.
+- [Présentation](#présentation)
+- [Fonctionnalités principales](#fonctionnalités-principales)
+- [Diagramme de séquence](#diagramme-de-séquence)
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+  - [Création de l'instance](#création-de-linstance)
+  - [Initialisation du périphérique](#initialisation-du-périphérique)
+  - [Lecture de statut](#lecture-de-statut)
+  - [Reconfiguration de PDO](#reconfiguration-de-pdo)
+  - [Gestion de l'interruption ALERT](#gestion-de-linterruption-alert)
+- [Configuration par défaut](#configuration-par-défaut)
+- [Licences](#licences)
 
-Ajoutez dans votre `CMakeLists.txt` principal :
+---
 
-```cmake
-idf_component_register(
-    SRCS 
-    .....
-    REQUIRES STUSB4500
-) 
+## 📖 Présentation
+
+Cette bibliothèque permet de piloter le **STUSB4500** sur un ESP32 en C++ moderne. Elle encapsule :
+
+- la lecture/écriture des **PDO**,
+- la configuration persistante via **NVM**,
+- l'écoute des changements via la broche **ALERT** (interruption GPIO),
+- la récupération des états USB-PD (status, RDO, CC, VBUS...).
+
+---
+
+## 🔧 Fonctionnalités principales
+
+- ✅ Encapsulation dans `STUSB4500Manager`
+- ✅ Intégration avec `I2CDevices`
+- ✅ Accès complet aux registres STATUS (JSON ou log)
+- ✅ Écriture sélective d’un PDO avec `reconfigure()`
+- ✅ Gestion de la configuration persistante (`check_config()`)
+- ✅ Support des interruptions GPIO via `handle_alert()`
+
+---
+
+## 🔁 Diagramme de séquence
+
+```mermaid
+sequenceDiagram
+    participant App
+    participant STUSB4500Manager
+    participant STUSB4500
+
+    App->>STUSB4500Manager: init()
+    STUSB4500Manager->>STUSB4500: lecture NVM
+    STUSB4500Manager->>STUSB4500: vérification config
+    App->>STUSB4500Manager: reconfigure(PDOx)
+    STUSB4500Manager->>STUSB4500: mise à jour PDO
+    STUSB4500Manager->>STUSB4500: soft reset
+    STUSB4500-->>STUSB4500Manager: IRQ ALERT
+    STUSB4500Manager->>STUSB4500: read status
+    STUSB4500Manager-->>App: export JSON / log
 ```
 
 ---
 
-## ✨ Utilisation
+## 🛠️ Installation
 
-### Création du périphérique
+Copiez ce composant dans le dossier `components/stusb4500` de votre projet ESP-IDF.
+
+Modifiez votre `CMakeLists.txt` :
+
+```cmake
+idf_component_register(
+  SRCS ...
+  INCLUDE_DIRS "include"
+  REQUIRES STUSB4500
+)
+```
+
+---
+
+## 🚀 Utilisation
+
+### Création de l'instance
 
 ```cpp
 #include "stusb4500.hpp"
 using namespace stusb4500;
 
-auto i2c = std::make_shared<I2CDevices>(
-    I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, 0x28, 400000
-);
-
-STUSB4500 stusb(i2c);
+I2CDevices i2c(I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, 0x28, 400000);
+STUSB4500Manager stusb(i2c);
 ```
 
----
-
-### Lecture des PDOs
+### Initialisation du périphérique
 
 ```cpp
-float v = stusb.get_voltage(1);
-float i = stusb.get_current(1);
+stusb.init();           // Initialise la config et la tâche interne
+stusb.init_device();    // Force la lecture + configuration du STUSB4500
 ```
 
----
-
-### Écriture dans la configuration
+### Lecture de statut
 
 ```cpp
-stusb.set_voltage(2, 9.0f);
-stusb.set_current(2, 2.0f);
-stusb.set_voltage(3, 15.0f);
+stusb.get_status(OutputFormat::Log);   // Affiche tous les registres via ESP_LOG
+stusb.get_status(OutputFormat::JSON);  // Génère une structure JSON
 ```
 
----
-
-### Sauvegarde en mémoire NVM
+### Reconfiguration de PDO
 
 ```cpp
-stusb.write_sectors(); // Persiste la config actuelle dans le STUSB4500
+Config new_cfg;
+// ... remplissage de la configuration PDO
+stusb.reconfigure(1, new_cfg); // Met à jour le PDO1 et force une renégociation
 ```
 
----
-
-### Détection automatique via broche ALERT
+### Gestion de l'interruption ALERT
 
 ```cpp
-stusb.configure_alert_pin(GPIO_NUM_25); // Active la gestion auto via interruption
-```
-
-La bibliothèque surveille :
-- la broche `ALERT` (si configurée),
-- la présence du périphérique,
-- la cohérence de la configuration avec un profil par défaut.
-
----
-
-### Écriture automatique de la configuration par défaut
-
-Vous pouvez modifier la configuration NVM compilée dans :
-
-```cpp
-// stusb4500_conf.hpp
-static constexpr uint8_t default_sector_config[5][8] = {
-    {0x00, 0x00, 0xB0, 0xAA, 0x00, 0x45, 0x00, 0x00},
-    ...
-};
+gpio_install_isr_service(0);
+stusb.handle_alert(); // À appeler depuis le handler d'interruption
 ```
 
 ---
 
-## 📄 Licence
 
-Ce projet est distribué sous la licence **Apache License 2.0**.  
-Vous pouvez l’utiliser librement dans des projets personnels ou commerciaux.
+## 🧩 Configuration par défaut
 
-Voir le fichier [`LICENSE`](./LICENSE) pour plus d’informations.
+La configuration par défaut du STUSB4500 (PDOs, courants, tensions, fonctions GPIO, etc.) est définie dans le fichier **`Kconfig`**, accessible via le menu `idf.py menuconfig`.
+
+Exemple :
+
+```bash
+idf.py menuconfig
+ → Component config
+   → STUSB4500 Configuration
+     → PDO1 Voltage (V)
+     → PDO1 Current (mA)
+     ...
+```
+
+Ces valeurs sont ensuite injectées dans la structure `Config` lors de l’appel à `init_device()`.
 
 ---
 
-## 👨‍💻 Auteur
+## 📜 Licences
 
-Développé par **Lionel Orcil** pour **IOBEWI**.
+Code sous licence MIT. Voir [LICENSE](./LICENSE).
+
+---
+
+## 🔮 Améliorations futures
+
+- 🔄 Support du rôle dual
+- 📤 Export JSON complet depuis le buffer de logs
+- 📦 Intégration avec un bus de messages (MQTT, CAN, etc.)
+
