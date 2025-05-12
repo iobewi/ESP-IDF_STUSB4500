@@ -3,8 +3,8 @@
 #include "esp_err.h"
 #include <cstdint>
 
-#include "interface.hpp"
-#include "nvm/nvm_data.hpp"
+#include "stusb4500-interface.hpp"
+#include "nvm/stusb4500-nvm_data.hpp"
 
 namespace stusb4500
 {

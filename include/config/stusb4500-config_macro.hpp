@@ -1,5 +1,5 @@
 #pragma once
-#include "config.hpp"
+#include "config/stusb4500-config.hpp"
 
 namespace stusb4500
 {

@@ -1,4 +1,4 @@
-#include "nvm/nvm.hpp"
+#include "nvm/stusb4500-nvm.hpp"
 
 #define RETURN_IF_ERROR(x)         \
     do {                           \

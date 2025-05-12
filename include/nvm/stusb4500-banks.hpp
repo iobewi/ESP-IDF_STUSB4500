@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
-#include "config/config.hpp"
-#include "pd/pdo.hpp"
+#include "config/stusb4500-config.hpp"
+#include "pd/stusb4500-pdo.hpp"
 
 namespace stusb4500
 {

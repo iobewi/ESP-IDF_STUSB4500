@@ -3,8 +3,8 @@
 #include "esp_err.h"
 #include <cstdint>
 
-#include "interface.hpp"
-#include "status/status_types.hpp"
+#include "stusb4500-interface.hpp"
+#include "status/stusb4500-status_types.hpp"
 
 namespace stusb4500
 {

@@ -9,12 +9,12 @@
 #include "esp_log.h"
 #include "esp_intr_alloc.h"
 
-#include "ctrl/ctrl.hpp"
-#include "nvm/nvm.hpp"
-#include "pd/pdo.hpp"
-#include "pd/rdo.hpp"
-#include "pd/rx_datas.hpp"
-#include "status/status.hpp"
+#include "ctrl/stusb4500-ctrl.hpp"
+#include "nvm/stusb4500-nvm.hpp"
+#include "pd/stusb4500-pdo.hpp"
+#include "pd/stusb4500-rdo.hpp"
+#include "pd/stusb4500-rx_datas.hpp"
+#include "status/stusb4500-status.hpp"
 
 namespace stusb4500
 {

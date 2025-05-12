@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "esp_log.h"
 
-#include "common_types.hpp"
+#include "stusb4500-common_types.hpp"
 
 namespace stusb4500
 {

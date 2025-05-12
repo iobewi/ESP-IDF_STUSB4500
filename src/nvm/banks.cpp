@@ -1,5 +1,5 @@
 #include <cstdint>
-#include "nvm/banks.hpp"
+#include "nvm/stusb4500-banks.hpp"
 
 namespace stusb4500
 {

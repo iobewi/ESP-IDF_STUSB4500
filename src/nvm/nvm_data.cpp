@@ -2,7 +2,7 @@
 
 #include "esp_log.h"
 
-#include "nvm/nvm_data.hpp"
+#include "nvm/stusb4500-nvm_data.hpp"
 
 namespace stusb4500
 {

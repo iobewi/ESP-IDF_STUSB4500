@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include "interface.hpp"
-#include "pd/pdo.hpp"
+#include "stusb4500-interface.hpp"
+#include "pd/stusb4500-pdo.hpp"
 
 namespace stusb4500 {
 

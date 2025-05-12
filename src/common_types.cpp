@@ -1,5 +1,5 @@
 #include <cstdint>
-#include "common_types.hpp"
+#include "stusb4500-common_types.hpp"
 
 #include "esp_log.h"
 

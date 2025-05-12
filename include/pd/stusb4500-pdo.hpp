@@ -1,6 +1,6 @@
 #pragma once
-#include "interface.hpp"
-#include "common_types.hpp"
+#include "stusb4500-interface.hpp"
+#include "stusb4500-common_types.hpp"
 
 namespace stusb4500
 {

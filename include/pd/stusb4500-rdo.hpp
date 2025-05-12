@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include "esp_err.h"
-#include "interface.hpp"
+#include "stusb4500-interface.hpp"
 
 namespace stusb4500
 {

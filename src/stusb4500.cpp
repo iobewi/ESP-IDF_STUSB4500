@@ -1,4 +1,4 @@
-#include "config/config_macro.hpp"
+#include "config/stusb4500-config_macro.hpp"
 #include "stusb4500.hpp"
 #include "sdkconfig.h"
 
