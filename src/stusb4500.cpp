@@ -42,7 +42,7 @@ namespace stusb4500
 
     void STUSB4500Manager::init()
     {
-        xTaskCreatePinnedToCore(task_wrapper, "STUSB_Task", 4096, this, 5, &task_handle_, 1);
+        xTaskCreatePinnedToCore(task_wrapper, "STUSB_Task", 4096, this, 5, &task_handle_, 0);
     }
 
     esp_err_t STUSB4500Manager::init_device()
