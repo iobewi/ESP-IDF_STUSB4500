@@ -64,6 +64,7 @@ namespace stusb4500
 
         TaskHandle_t task_handle_ = nullptr;
 
+        inline static const char *TAG = "STUSB4500_MANAGER";
         bool ready_ = false;
         esp_err_t is_ready();
 

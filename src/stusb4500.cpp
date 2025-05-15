@@ -31,8 +31,6 @@
 namespace stusb4500
 {
 
-    static const char *TAG = "STUSB4500";
-
     inline esp_err_t return_if_not_ready(bool ready, const char* tag)
     {
         if (!ready)
