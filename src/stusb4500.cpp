@@ -33,6 +33,16 @@ namespace stusb4500
 
     static const char *TAG = "STUSB4500";
 
+    inline esp_err_t return_if_not_ready(bool ready, const char* tag)
+    {
+        if (!ready)
+        {
+            ESP_LOGE(tag, "Tentative d’utilisation sans initialisation préalable");
+            return ESP_ERR_INVALID_STATE;
+        }
+        return ESP_OK;
+    }
+
     STUSB4500Manager::STUSB4500Manager(I2CDevices &i2c)
         : i2c_(i2c),
           cfg_(i2c_),
@@ -50,7 +60,17 @@ namespace stusb4500
 
     esp_err_t STUSB4500Manager::init_device()
     {
+        RETURN_IF_ERROR(is_ready());
+        ConfigParams from_kconfig = load_config_from_kconfig();
+        cfg_.datas() = from_kconfig ; 
+        cfg_.datas().log();
+        RETURN_IF_ERROR(get_status());
+        RETURN_IF_ERROR(apply_nvm_config(from_kconfig));
+        return ESP_OK;
+    }
 
+    esp_err_t STUSB4500Manager::is_ready()
+    {
         const int max_attempts = 10;
         const int delay_ms = 50;
         esp_err_t err = ESP_OK;
@@ -69,19 +89,16 @@ namespace stusb4500
         if (err != ESP_OK)
         {
             ESP_LOGE(TAG, "STUSB4500 non détecté après %d tentatives", max_attempts);
+            ready_ = false;
             return ESP_ERR_TIMEOUT; // ou err si tu veux refléter la dernière erreur de ready()
         }
-
-        ConfigParams from_kconfig = load_config_from_kconfig();
-        cfg_.datas() = from_kconfig ; 
-        cfg_.datas().log();
-        RETURN_IF_ERROR(get_status());
-        RETURN_IF_ERROR(apply_nvm_config(from_kconfig));
+        ready_ = true;
         return ESP_OK;
     }
 
     esp_err_t STUSB4500Manager::apply_nvm_config(ConfigParams &cfg)
-    {
+    {   
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         esp_err_t err = check_nvm_config(cfg);
         if ( err == ESP_ERR_INVALID_STATE)
         {
@@ -99,6 +116,7 @@ namespace stusb4500
 
     esp_err_t STUSB4500Manager::check_nvm_config(ConfigParams &cfg)
     {
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         NVMData new_nvm(cfg);
         ConfigParams active_cfg;
         NVMData active_nvm(active_cfg);
@@ -118,6 +136,7 @@ namespace stusb4500
 
     esp_err_t STUSB4500Manager::handle_alert()
     {
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         RETURN_IF_ERROR(status_.read_alert_status());
 
         if (status_.alert_status_1.get_values().port_status_al )
@@ -164,12 +183,14 @@ namespace stusb4500
     /// Envoie un soft reset au STUSB4500
     esp_err_t STUSB4500Manager::reset()
     {
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         return ctrl_.send_soft_reset();
     }
 
     /// Réécrit le PDO avec la configuration par défaut et force une renégociation
     esp_err_t STUSB4500Manager::reconfigure(uint8_t index, Config &cfg)
     {
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         PDO active_pdo(i2c_,index,cfg.datas().power_.pdos[index]);
         RETURN_IF_ERROR(active_pdo.write());
         RETURN_IF_ERROR(ctrl_.update_pdo_number(index));
@@ -179,6 +200,7 @@ namespace stusb4500
     /// Lit et retourne l’état courant de la connexion USB-C
     esp_err_t STUSB4500Manager::get_status(OutputFormat format)
     {
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         RETURN_IF_ERROR(status_.get_status());
         HANDLE_OUTPUT(format, status_);
         return ESP_OK;
@@ -186,6 +208,7 @@ namespace stusb4500
 
     esp_err_t STUSB4500Manager::get_connection_status(OutputFormat format)
     {
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         RETURN_IF_ERROR(status_.read_port_status_1());
         HANDLE_OUTPUT(format, status_.port_status_1);
         RETURN_IF_ERROR(status_.read_cc_status());
@@ -195,6 +218,7 @@ namespace stusb4500
 
     esp_err_t STUSB4500Manager::get_active_pdo(OutputFormat format)
     {
+        RETURN_IF_ERROR(return_if_not_ready(ready_, TAG));
         RXDatas rxdatas(i2c_);
         RETURN_IF_ERROR(rxdatas.read());
         RETURN_IF_ERROR(status_.read_policy_engine_state());
@@ -261,6 +285,7 @@ namespace stusb4500
         init_device();
         get_connection_status(OutputFormat::Log);
         get_active_pdo(OutputFormat::Log);
+        
         while (true)
         {
             if (gpio_get_level(alert_gpio_) == 0 || ulTaskNotifyTake(pdTRUE, portMAX_DELAY))

@@ -64,6 +64,9 @@ namespace stusb4500
 
         TaskHandle_t task_handle_ = nullptr;
 
+        bool ready_ = false;
+        esp_err_t is_ready();
+
         static void task_wrapper(void *arg);
         static void IRAM_ATTR gpio_isr_handler(void *arg);
         void setup_interrupt(gpio_num_t gpio);
