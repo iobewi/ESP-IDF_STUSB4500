@@ -3,37 +3,27 @@
 #include <cstdint>
 #include "esp_log.h"
 
-#include "stusb4500-common_types.hpp"
+#include "stusb4500-interface.hpp"
+#include "config/stusb4500-config_types.hpp"
 
 namespace stusb4500
 {
-    class Config
+    class Config : public INTERFACE
     {
     public:
-        Config(const PDObjectProfile& p1 = {},
-            const PDObjectProfile& p2 = {},
-            const PDObjectProfile& p3 = {});
+        Config(I2CDevices &dev, 
+            const ConfigParams& params = {});
         
-        // Accès aux blocs
-        PowerProfile &power() { return power_; }
-        const PowerProfile &power() const { return power_; }
+           
+        esp_err_t get_alert_status_mask() ;
+        esp_err_t set_alert_status_mask();
 
-        DischargeSettings &discharge() { return discharge_; }
-        const DischargeSettings &discharge() const { return discharge_; }
-
-        // Autres paramètres
-        GPIOFunction gpio_function = GPIOFunction::ErrorRecovery;
-        PowerOkConfig power_ok = PowerOkConfig::CONFIG_2;
-        bool req_src_current = false;
-        bool power_only_5v = false;
-        uint8_t alert_mask = 0;
-
-        void log() const;
-        std::string to_json() const;
+        ConfigParams& datas() { return params_; };
+        const ConfigParams& datas() const { return params_; };
 
     private:
-        PowerProfile power_;
-        DischargeSettings discharge_ = {};
+        ConfigParams params_;
+        inline static const char *TAG = "STUSB4500-CONFIG";
     };
 
 } // namespace stusb4500

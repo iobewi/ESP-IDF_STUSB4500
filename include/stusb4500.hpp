@@ -9,6 +9,7 @@
 #include "esp_log.h"
 #include "esp_intr_alloc.h"
 
+#include "config/stusb4500-config.hpp"
 #include "ctrl/stusb4500-ctrl.hpp"
 #include "nvm/stusb4500-nvm.hpp"
 #include "pd/stusb4500-pdo.hpp"
@@ -36,13 +37,15 @@ namespace stusb4500
 
         esp_err_t init_device();
 
-        esp_err_t check_config(Config &cfg);
-
-        esp_err_t handle_alert();
-        
         /// Envoie un soft reset au STUSB4500
         esp_err_t reset();
 
+        esp_err_t apply_nvm_config(ConfigParams &cfg);
+
+        esp_err_t check_nvm_config(ConfigParams &cfg);
+
+        esp_err_t handle_alert();
+        
         /// Réécrit le PDO avec la configuration par défaut et force une renégociation
         esp_err_t reconfigure(uint8_t index, Config &cfg);
 
@@ -57,6 +60,7 @@ namespace stusb4500
         Config cfg_;
         gpio_num_t alert_gpio_;
         STATUS status_;
+        CTRL ctrl_;
 
         TaskHandle_t task_handle_ = nullptr;
 

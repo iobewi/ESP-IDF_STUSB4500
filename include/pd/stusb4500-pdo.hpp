@@ -19,6 +19,7 @@ namespace stusb4500
         const PowerProfile &power() const { return power_; }
 
     private:
+        inline static const char *TAG = "STUSB4500-PDO";
         size_t index_;
         PowerProfile power_;
         static constexpr uint8_t base_reg_addr = 0x85;

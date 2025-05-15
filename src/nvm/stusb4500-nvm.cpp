@@ -133,7 +133,7 @@ namespace stusb4500
 
 
         // Post-vérification
-        Config cfg_data({},{},{});
+        ConfigParams cfg_data;
         NVMData readback(cfg_data);
         err = read(readback);
         readback.log();

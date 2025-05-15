@@ -39,119 +39,53 @@ namespace stusb4500
         return step * 10;
     }
 
-    uint16_t decode_lup_current(uint8_t step)
+   constexpr uint16_t decode_lup_current(uint8_t step)
     {
-        uint16_t current_ma;
-        switch (step & 0x0F)
-        {
-        case 0b0001:
-            current_ma = (500);
-            break;
-        case 0b0010:
-            current_ma = (750);
-            break;
-        case 0b0011:
-            current_ma = (1000);
-            break;
-        case 0b0100:
-            current_ma = (1250);
-            break;
-        case 0b0101:
-            current_ma = (1500);
-            break;
-        case 0b0110:
-            current_ma = (1750);
-            break;
-        case 0b0111:
-            current_ma = (2000);
-            break;
-        case 0b1000:
-            current_ma = (2250);
-            break;
-        case 0b1001:
-            current_ma = (2500);
-            break;
-        case 0b1010:
-            current_ma = (2750);
-            break;
-        case 0b1011:
-            current_ma = (3000);
-            break;
-        case 0b1100:
-            current_ma = (3500);
-            break;
-        case 0b1101:
-            current_ma = (4000);
-            break;
-        case 0b1110:
-            current_ma = (4500);
-            break;
-        case 0b1111:
-            current_ma = (5000);
-            break;
-        default:
-            current_ma = (0); // Flexible ou valeur non définie
-            break;
-        }
-        return current_ma;
+        constexpr uint16_t current_table[16] = {
+            0, 500, 750, 1000,
+            1250, 1500, 1750, 2000,
+            2250, 2500, 2750, 3000,
+            3500, 4000, 4500, 5000
+        };
+        return current_table[step & 0x0F];
     }
 
-    uint8_t encode_lup_current( uint16_t current_ma) 
+
+    constexpr uint8_t encode_lup_current(uint16_t current_ma)
     {
-        switch (current_ma)
+        constexpr uint16_t current_table[16] = {
+            0, 500, 750, 1000,
+            1250, 1500, 1750, 2000,
+            2250, 2500, 2750, 3000,
+            3500, 4000, 4500, 5000
+        };
+
+        for (uint8_t i = 0; i < 16; ++i)
         {
-        case 500:
-            return 0b0001;
-        case 750:
-            return 0b0010;
-        case 1000:
-            return 0b0011;
-        case 1250:
-            return 0b0100;
-        case 1500:
-            return 0b0101;
-        case 1750:
-            return 0b0110;
-        case 2000:
-            return 0b0111;
-        case 2250:
-            return 0b1000;
-        case 2500:
-            return 0b1001;
-        case 2750:
-            return 0b1010;
-        case 3000:
-            return 0b1011;
-        case 3500:
-            return 0b1100;
-        case 4000:
-            return 0b1101;
-        case 4500:
-            return 0b1110;
-        case 5000:
-            return 0b1111;
-        default:
-            return 0b0000; // Flexible
+            if (current_table[i] == current_ma)
+                return i;
         }
+
+        return 0x00;
     }
 
 
     void Bank1::decode(const uint8_t *buffer)
     {
-        data_.gpio_function = static_cast<GPIOFunction>((buffer[0] >> 4) & 0x03);
-        data_.discharge().time_to_pdo = extract_low4(buffer[2]);
-        data_.discharge().time_to_0v = extract_high4(buffer[2]);
+        data_.gpio_function = static_cast<ConfigParams::GPIOFunction>((buffer[0] >> 4) & 0x03);
+        data_.discharge_.time_to_pdo = extract_low4(buffer[2]);
+        data_.discharge_.time_to_0v = extract_high4(buffer[2]);
     }
 
     void Bank1::encode(uint8_t *buffer) const
     {
         buffer[0] = (buffer[0] & 0xCF) | ((static_cast<uint8_t>(data_.gpio_function) & 0x03) << 4);
-        buffer[2] = pack4(data_.discharge().time_to_pdo, data_.discharge().time_to_0v);
+        buffer[2] = pack4(data_.discharge_.time_to_pdo, data_.discharge_.time_to_0v);
     }
 
     void Bank3::decode(const uint8_t *buffer)
     {
-        auto &power = data_.power();
+        auto &power = data_.power_;
         // Octet 2
 
         power.usb_comm_capable = (buffer[2] & 0x01);
@@ -176,7 +110,7 @@ namespace stusb4500
 
     void Bank3::encode(uint8_t *buffer) const
     {
-        auto &power = data_.power();
+        auto &power = data_.power_;
         
         buffer[2] = (power.usb_comm_capable & 0x01) | ((power.pdo_number & 0x03) << 1) | ((power.unconstrained_power & 0x01) << 3) | ((encode_lup_current(power.pdos[0].current_ma) & 0x0F )<< 4);
 
@@ -195,19 +129,19 @@ namespace stusb4500
 
     void Bank4::decode(const uint8_t *buffer)
     {
-        auto &power = data_.power();
+        auto &power = data_.power_;
 
         power.pdos[1].voltage_mv = decode_voltage_step(((buffer[0] >> 6) & 0x03) | (buffer[1] << 2));
         power.pdos[2].voltage_mv = decode_voltage_step((buffer[2] | ((buffer[3] & 0x03) << 8)));
         power.flex_current_ma = decode_current_step(((buffer[3] >> 2) & 0x3F) | ((buffer[4] & 0x0F) << 6));
-        data_.power_ok = static_cast<PowerOkConfig>((buffer[4] >> 5) & 0x03);
+        data_.power_ok = static_cast<ConfigParams::PowerOkConfig>((buffer[4] >> 5) & 0x03);
         data_.req_src_current = (buffer[6] >> 4) & 0x01;
-        data_.alert_mask = buffer[7];
+        data_.alert_mask.set_raw(buffer[7]);
     }
 
     void Bank4::encode(uint8_t *buffer) const
     {
-        auto &power = data_.power();
+        auto &power = data_.power_;
 
         buffer[0] = (buffer[0] & 0x3F) | ((encode_voltage_step(power.pdos[1].voltage_mv) & 0x03) << 6);
         buffer[1] = (encode_voltage_step(power.pdos[1].voltage_mv) >> 2) & 0xFF;

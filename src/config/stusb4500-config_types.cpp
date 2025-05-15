@@ -1,31 +1,52 @@
-#include "config/stusb4500-config.hpp"
+#include "config/stusb4500-config_types.hpp"
 #include "cJSON.h"
-
+#include "esp_log.h"
 
 namespace stusb4500
 {
     static const char *TAG = "STUSB4500-CONFIG";
-    
-    Config::Config(const PDObjectProfile &p1,
-                   const PDObjectProfile &p2,
-                   const PDObjectProfile &p3)
+    inline std::string json_bool(const char *key, bool value)
     {
-        power_.pdos.resize(3);  // ← Fix ici
-        power_.pdos[0] = p1;
-        power_.pdos[1] = p2;
-        power_.pdos[2] = p3;
+        return "\"" + std::string(key) + "\": " + (value ? "true" : "false");
+    }
     
-        power_.pdo_number = 0;
-        for (const auto &pdo : power_.pdos)
-        {
-            if (pdo.defined)
-            {
-                ++power_.pdo_number;
-            }
-        }
+    AlertStatus1MaskRegister::AlertStatus1MaskReg AlertStatus1MaskRegister::get_values() const
+    {
+        AlertStatus1MaskReg values = {};
+        values.port_status_al_mask = raw_ & (1 << 6);
+        values.typec_monitoring_status_al_mask = raw_ & (1 << 5);
+        values.cc_hw_fault_status_al_mask = raw_ & (1 << 4);
+        values.prt_status_al_mask = raw_ & (1 << 1);
+        return values;
+    }
+
+    void AlertStatus1MaskRegister::log() const
+    {
+        AlertStatus1MaskReg values = get_values();
+        ESP_LOGI(TAG, "ALERT_STATUS_1_MASK: PORT_STATUS_AL_MASK=%s, TYPEC_MONITORING_STATUS_AL_MASK=%s, CC_HW_FAULT_STATUS_AL_MASK=%s, PRT_STATUS_AL_MASK=%s",
+                 values.port_status_al_mask ? "MASKED" : "UNMASKED",
+                 values.typec_monitoring_status_al_mask ? "MASKED" : "UNMASKED",
+                 values.cc_hw_fault_status_al_mask ? "MASKED" : "UNMASKED",
+                 values.prt_status_al_mask ? "MASKED" : "UNMASKED");
+    }
+
+    std::string AlertStatus1MaskRegister::to_json() const
+    {
+        AlertStatus1MaskReg values = get_values();
+        return std::string("{") +
+               json_bool("port_status_al_mask", values.port_status_al_mask) + "," +
+               json_bool("typec_monitoring_status_al_mask", values.typec_monitoring_status_al_mask) + "," +
+               json_bool("cc_hw_fault_status_al_mask", values.cc_hw_fault_status_al_mask) + "," +
+               json_bool("prt_status_al_mask", values.prt_status_al_mask) +
+               "}";
+    }
+
+    ConfigParams::ConfigParams()
+    {
+        power_.pdos.resize(3);
     };
 
-    const char* to_string(GPIOFunction func)
+    std::string  ConfigParams::to_string(GPIOFunction func)
     {
         switch (func)
         {
@@ -37,7 +58,7 @@ namespace stusb4500
         }
     }
 
-    const char* to_string(PowerOkConfig config)
+    std::string  ConfigParams::to_string(PowerOkConfig config)
     {
         switch (config)
         {
@@ -50,15 +71,15 @@ namespace stusb4500
     }
 
 
-    void Config::log() const
+    void ConfigParams::log() const
     {
         ESP_LOGI(TAG, "========== Configuration STUSB4500 ==========");
 
         // GPIO Function
-        ESP_LOGI(TAG, "GPIO Function       : %s", to_string(gpio_function));
+        ESP_LOGI(TAG, "GPIO Function       : %s", to_string(gpio_function).c_str());
 
          // Power OK Config
-         ESP_LOGI(TAG, "Power OK Config     : %s", to_string(power_ok));
+         ESP_LOGI(TAG, "Power OK Config     : %s", to_string(power_ok).c_str());
 
         // Discharge settings
         ESP_LOGI(TAG, "Discharge to 0V     : %u", discharge_.time_to_0v);
@@ -100,15 +121,15 @@ namespace stusb4500
         ESP_LOGI(TAG, "=============================================");
     }
 
-    std::string Config::to_json() const
+    std::string ConfigParams::to_json() const
     {
         cJSON *root = cJSON_CreateObject();
     
         // GPIO function
-        cJSON_AddStringToObject(root, "gpio_function", to_string(gpio_function));
+        cJSON_AddStringToObject(root, "gpio_function", to_string(gpio_function).c_str());
 
         // Power OK config
-        cJSON_AddStringToObject(root, "power_ok", to_string(power_ok));
+        cJSON_AddStringToObject(root, "power_ok", to_string(power_ok).c_str());
             
         // Discharge
         cJSON *discharge = cJSON_CreateObject();
@@ -148,7 +169,6 @@ namespace stusb4500
         // Flags & autres
         cJSON_AddBoolToObject(root, "power_only_5v", power_only_5v);
         cJSON_AddBoolToObject(root, "req_src_current", req_src_current);
-        cJSON_AddNumberToObject(root, "alert_mask", alert_mask);
     
         // Conversion en string
         char* json_str = cJSON_PrintUnformatted(root);

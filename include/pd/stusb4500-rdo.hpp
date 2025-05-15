@@ -30,6 +30,7 @@ namespace stusb4500
         void log() const;
 
     private:
+        inline static const char *TAG = "STUSB4500-RDO";
         uint32_t raw_ = 0;
 
         static constexpr uint8_t reg_addr = 0x91;

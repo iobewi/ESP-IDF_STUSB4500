@@ -25,6 +25,7 @@ public:
     void log() const;
 
 private:
+    inline static const char *TAG = "STUSB4500-RXDATAS";
     uint32_t data_[7] = {0};
     uint16_t header_ = 0;
 

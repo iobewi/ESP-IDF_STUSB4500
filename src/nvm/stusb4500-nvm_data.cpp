@@ -60,14 +60,14 @@ namespace stusb4500
         auto diffs = diff(other);
         for (const auto &[i, before, after] : diffs)
         {
-            ESP_LOGW("STUSB4500NVM", "Offset 0x%02X: 0x%02X -> 0x%02X",
+            ESP_LOGW(TAG, "Offset 0x%02X: 0x%02X -> 0x%02X",
                      static_cast<int>(i),
                      static_cast<int>(before),
                      static_cast<int>(after));
         }
         if (diffs.empty())
         {
-            ESP_LOGW("STUSB4500NVM", "Aucune différence détectée dans la NVM.");
+            ESP_LOGW(TAG, "Aucune différence détectée dans la NVM.");
         }
     }
 
@@ -75,7 +75,7 @@ namespace stusb4500
     {
         auto buffer = to_array();
 
-        ESP_LOGI("STUSB4500NVM", "Contenu brut NVM :");
+        ESP_LOGI(TAG, "Contenu brut NVM :");
         for (size_t i = 0; i < buffer.size(); i += 8)
         {
             char line[64];
@@ -84,7 +84,7 @@ namespace stusb4500
             {
                 len += snprintf(line + len, sizeof(line) - len, "%02X ", buffer[i + j]);
             }
-            ESP_LOGI("STUSB4500NVM", "%s", line);
+            ESP_LOGI(TAG, "%s", line);
         }
     }
 

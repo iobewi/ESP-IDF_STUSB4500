@@ -18,7 +18,7 @@ namespace stusb4500
         Bank3 bank3;
         Bank4 bank4;
 
-        explicit NVMData(Config &data)
+        explicit NVMData(ConfigParams &data)
             : bank0(data),
               bank1(data),
               bank2(data),
@@ -41,6 +41,7 @@ namespace stusb4500
         void print_diff(const std::array<uint8_t, 40> &other) const;
 
         void log() const;
-
+        private:
+                inline static const char *TAG = "STUSB4500-NVMDATA";
     };
 } // namespace stusb4500

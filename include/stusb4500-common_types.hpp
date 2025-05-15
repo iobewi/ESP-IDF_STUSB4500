@@ -45,27 +45,4 @@ namespace stusb4500
         void log() const;
         std::string to_json() const;
     };
-
-    enum class PowerOkConfig : uint8_t
-    {
-        CONFIG_1 = 0b00,
-        NOT_APPLICABLE = 0b01,
-        CONFIG_2 = 0b10,
-        CONFIG_3 = 0b11
-    };
-
-    enum class GPIOFunction : uint8_t
-    {
-        SWCtrl = 0b00,
-        ErrorRecovery = 0b01,
-        Debug = 0b10,
-        SinkPower = 0b11,
-    };
-
-    struct DischargeSettings
-    {
-        uint8_t time_to_0v = 9;
-        uint8_t time_to_pdo = 12;
-        bool disable = false;
-    };
 };

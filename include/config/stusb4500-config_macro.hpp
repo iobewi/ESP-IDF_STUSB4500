@@ -1,8 +1,8 @@
 #pragma once
-#include "config/stusb4500-config.hpp"
+#include "config/stusb4500-config_types.hpp"
 
 namespace stusb4500
 {
-    Config load_config_from_kconfig();
+    ConfigParams load_config_from_kconfig();
 
 } // namespace stusb4500

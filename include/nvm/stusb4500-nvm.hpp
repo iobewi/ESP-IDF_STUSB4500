@@ -18,6 +18,8 @@ namespace stusb4500
         esp_err_t write(const NVMData &nvm);
 
     private:
+        inline static const char *TAG = "STUSB4500-NVM";
+
         esp_err_t write_ctrl0(uint8_t flags);
         esp_err_t write_ctrl1(uint8_t flags);
 
