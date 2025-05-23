@@ -29,8 +29,8 @@ namespace stusb4500
                 err = i2c.read(reg, data, len);
                 if (err == ESP_OK)
                 {
-                    //ESP_LOGI(TAG, , "I2C READ -> Reg: 0x%02X | Len: %d", reg, static_cast<int>(len));
-                    //ESP_LOG_BUFFER_HEX_LEVEL(TAG, , data, len, ESP_LOG_INFO);
+                    //ESP_LOGI(TAG, "I2C READ -> Reg: 0x%02X | Len: %d", reg, static_cast<int>(len));
+                    //ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, len, ESP_LOG_INFO);
                     return ESP_OK;
                 }
                 vTaskDelay(pdMS_TO_TICKS(10));
@@ -45,8 +45,8 @@ namespace stusb4500
             err = i2c.write(reg, data, len);
             if (err == ESP_OK)
             {
-                //ESP_LOGI(TAG, , "I2C WRITE -> Reg: 0x%02X | Len: %d", reg, static_cast<int>(len));
-                //ESP_LOG_BUFFER_HEX_LEVEL(TAG, , data, len, ESP_LOG_INFO);
+                //ESP_LOGI(TAG, "I2C WRITE -> Reg: 0x%02X | Len: %d", reg, static_cast<int>(len));
+                //ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, len, ESP_LOG_INFO);
                 return ESP_OK;
             }
 
