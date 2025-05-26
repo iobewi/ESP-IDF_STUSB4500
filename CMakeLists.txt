@@ -7,3 +7,6 @@ idf_component_register( SRC_DIRS "src"
                         INCLUDE_DIRS "include"
                         REQUIRES driver I2CDevices json
 ) 
+
+# Inclure le fichier Kconfig
+set(COMPONENT_KCONFIG Kconfig)
